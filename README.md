@@ -42,12 +42,12 @@ No install, no account. Open the site, type the session code and a name, and vot
 <p align="center"><img src="docs/images/phones.png" alt="The CrowdTale page on phones: joining, waiting in the lobby and voting" width="90%"></p>
 
 ### Create a session in seconds
-The CO-OP menu is built into the game's main menu. Create a session, share the code or invite your Steam friends, and watch everyone appear in the lobby as they join.
+The ONLINE menu is built into the game's main menu. Create a session, share the code or invite your Steam friends, and watch everyone appear in the lobby as they join.
 
 <table>
   <tr>
     <td><img src="docs/images/session.jpg" alt="Session created, with the code to share"></td>
-    <td><img src="docs/images/lobby.jpg" alt="The CO-OP lobby with the players and the host settings"></td>
+    <td><img src="docs/images/lobby.jpg" alt="The ONLINE lobby with the players and the host settings"></td>
   </tr>
   <tr>
     <td align="center">Your session code, ready to share</td>
@@ -91,8 +91,8 @@ During an episode, everyone in the session is listed in the corner of the screen
 ## How to play
 
 1. Download the latest release and extract it into the game folder (Steam > right-click the game > Manage > Browse local files).
-2. **Host:** main menu > **CO-OP** > **CREATE SESSION**, then invite your Steam friends or send them the code.
-3. **Friend with the game:** **CO-OP** > **JOIN SESSION** and type the code.
+2. **Host:** main menu > **ONLINE** > **CREATE SESSION**, then invite your Steam friends or send them the code.
+3. **Friend with the game:** **ONLINE** > **JOIN SESSION** and type the code.
 4. **Friends on a phone:** open <https://crowdtale.crowdtale.workers.dev> and type the code.
 5. **Host:** start an episode. Press READY when the box shows up, and enjoy the story together.
 

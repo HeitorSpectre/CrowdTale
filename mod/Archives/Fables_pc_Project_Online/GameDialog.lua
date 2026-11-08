@@ -661,6 +661,7 @@ local CoopApply = function(coop, index)
   local choice = coop.choices[index]
   if not choice then
     mCoop = nil
+    CoopResumeScene()
     return
   end
   mSelectedIndex = nil
@@ -673,9 +674,108 @@ local CoopApply = function(coop, index)
   end
   ActivateChoice(choice)
 end
+local mCoopWorldHeld
+local CoopHoldWorld = function()
+  if mCoopWorldHeld then
+    return
+  end
+  local ok, names = pcall(SceneGetActiveSceneNames, true)
+  if not ok or type(names) ~= "table" then
+    return
+  end
+  mCoopWorldHeld = {}
+  for _, name in pairs(names) do
+    if string.sub(tostring(name), 1, 3) ~= "ui_" then
+      local okT, scale = pcall(SceneGetTimeScale, name)
+      mCoopWorldHeld[name] = (okT and scale and 0 < scale) and scale or 1
+      pcall(SceneSetTimeScale, name, 0)
+    end
+  end
+end
+local CoopReleaseWorld = function()
+  local held = mCoopWorldHeld
+  mCoopWorldHeld = nil
+  for name, scale in pairs(held or {}) do
+    pcall(SceneSetTimeScale, name, scale)
+  end
+end
+local kCoopCamEndMargin = 0.2
+local kCoopCamJumpPos = 0.5
+local kCoopCamJumpRot = 12
+local CoopCameraPose = function()
+  local okS, scene = pcall(Game_GetScene)
+  if not okS or not scene then
+    return nil
+  end
+  local okC, cam = pcall(SceneGetCamera, scene)
+  if not okC or not cam then
+    return nil
+  end
+  local okP, pos = pcall(AgentGetWorldPos, cam)
+  local okR, rot = pcall(AgentGetWorldRot, cam)
+  if not okP or not okR or not pos or not rot then
+    return nil
+  end
+  return { cam = cam, name = AgentGetName(cam), pos = pos, rot = rot }
+end
+local CoopCameraEnding = function(cam)
+  local ok, list = pcall(AgentGetControllers, cam)
+  if not ok or type(list) ~= "table" then
+    return false
+  end
+  for _, c in ipairs(list) do
+    local okL, length = pcall(ControllerGetLength, c)
+    local okT, time = pcall(ControllerGetTime, c)
+    local okP, playing = pcall(ControllerIsPlaying, c)
+    if okL and okT and okP and playing and length and time and 0 < length and length - time < kCoopCamEndMargin then
+      return true
+    end
+  end
+  return false
+end
+local CoopAngle = function(a, b)
+  local d = math.abs(a - b) % 360
+  return 180 < d and 360 - d or d
+end
+local CoopCameraJumped = function(last, now)
+  if now.name ~= last.name then
+    return true
+  end
+  local dp = math.abs(now.pos.x - last.pos.x) + math.abs(now.pos.y - last.pos.y) + math.abs(now.pos.z - last.pos.z)
+  local dr = math.max(CoopAngle(now.rot.x, last.rot.x), CoopAngle(now.rot.y, last.rot.y), CoopAngle(now.rot.z, last.rot.z))
+  return kCoopCamJumpPos < dp or kCoopCamJumpRot < dr
+end
+local CoopWatchCamera = function(coop)
+  ThreadStart(function()
+    local last = CoopCameraPose()
+    while mCoop == coop and mCoopFrozen and not mCoopWorldHeld do
+      local now = CoopCameraPose()
+      if now and last and CoopCameraJumped(last, now) then
+        CoopHoldWorld()
+        break
+      end
+      if now and CoopCameraEnding(now.cam) then
+        CoopHoldWorld()
+        last = now
+        break
+      end
+      last = now or last
+      WaitForNextFrame()
+    end
+    while last and mCoopWorldHeld and mCoop == coop do
+      local now = CoopCameraPose()
+      if now then
+        pcall(AgentSetWorldPos, now.cam, last.pos)
+        pcall(AgentSetWorldRot, now.cam, last.rot)
+      end
+      WaitForNextFrame()
+    end
+  end)
+end
 CoopResumeScene = function()
   local frozen = mCoopFrozen
   mCoopFrozen = nil
+  CoopReleaseWorld()
   if frozen and ControllerIsPaused(frozen) then
     ControllerPlay(frozen)
   end
@@ -690,6 +790,7 @@ local CoopHoldScene = function(coop)
       if ControllerGetLength(controller) - ControllerGetTime(controller) < 0.6 then
         ControllerPause(controller)
         mCoopFrozen = controller
+        CoopWatchCamera(coop)
         return
       end
       Yield()
@@ -855,6 +956,7 @@ local CoopRunGuest = function(coop)
 end
 local CoopBegin = function()
   mCoop = nil
+  CoopResumeScene()
   if CoopChoice_Busy and CoopChoice_Busy() then
     return
   end

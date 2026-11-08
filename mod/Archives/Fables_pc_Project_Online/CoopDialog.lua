@@ -327,6 +327,9 @@ function CoopDialog_ShowPlayers(names)
   for slot = 1, kPlayersMax do
     local row = mRows[slot]
     if row and AgentExists(row.text) and AgentExists(row.icon) and not list[slot] then
+      AgentSetProperty(row.text, "Text String", "")
+      pcall(AgentSetProperty, row.icon, "Render Constant Alpha", 0)
+      PlaceRow(row, -1)
       AgentHide(row.text, true)
       AgentHide(row.icon, true)
     end

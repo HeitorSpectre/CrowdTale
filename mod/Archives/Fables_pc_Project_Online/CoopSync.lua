@@ -160,7 +160,7 @@ function CoopSave_Enter(role)
     end
   end
   SaveLoad_SetSlot(kCoopSlot)
-  pcall(SaveLoad_SetSlotName, "CO-OP", kCoopSlot)
+  pcall(SaveLoad_SetSlotName, CoopNet_Text("coop_title"), kCoopSlot)
   pcall(Save, kCoopSlot)
   CoopLink_LogNow("sync: using the co-op save slot" .. (fresh and " (new" .. (role == "host" and ", copied from " .. tostring(current) or "") .. ")" or ""))
 end
