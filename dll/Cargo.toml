@@ -1,0 +1,19 @@
+[package]
+name = "crowdtale_steam"
+version = "0.3.0"
+edition = "2021"
+description = "CrowdTale: Steam link for game-to-game sync, loaded by the game as dinput8.dll"
+
+[lib]
+name = "dinput8"
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+# Keep panic = "unwind": threads and callbacks catch their own panics so a bug
+# here can't take the game down.

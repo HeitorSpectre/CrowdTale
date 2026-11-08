@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.d3dtx binary
+*.landb binary
+*.dlog binary
+*.scene binary
+*.prop binary
+*.imap binary
+*.png binary
